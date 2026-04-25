@@ -215,14 +215,19 @@ Note: The extremely high PR-AUC is largely driven by the very high positive rate
 
 Experiments were repeated using multiple LLMs (ChatGPT and Claude).
 
-Across models:
+While both models ultimately required external audit, their failure patterns differed:
 
-* Both initially produced highly optimistic results
-* Both failed under flawed evaluation setups
-* Both converged to low, unstable performance after correction
+- **ChatGPT** produced conservative estimates (PR-AUC ≈ 0.01–0.02) and correctly identified key limitations (e.g., incomplete label matching), but did not investigate their downstream impact.  
+  → Failure mode: *shallow but incomplete analysis*
 
-> The failure is not model-specific,
-> but reflects a broader limitation of AI-generated workflows.
+- **Claude** initially reported highly optimistic results (PR-AUC ≈ 0.74) and failed to detect evaluation flaws, but was able to identify and correct them when explicitly prompted.  
+  → Failure mode: *overconfident analysis with conditional self-correction*
+
+After audit and correction, both models converged to similarly low and unstable performance.
+
+> This suggests that AI failure modes are not uniform — models can fail in different ways depending on their reasoning path, initial assumptions, and interaction context.
+
+
 
 ---
 
