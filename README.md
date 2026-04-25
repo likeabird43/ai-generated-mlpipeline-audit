@@ -263,3 +263,32 @@ data/
   spotify_tracks.csv
   heart_disease_uci.csv
 ```
+
+
+---
+
+## Discussion: Can AI Learn Music Beyond Proxy Features?
+
+This project shows that audio features provide only weak and unstable signal for culturally defined outcomes such as “hit songs.”
+
+This raises a broader question:
+
+> Can AI learn music in a way that aligns with human perception?
+
+Current models rely on proxy features (e.g., loudness, energy, mode),
+which capture production characteristics rather than musical meaning.
+
+While such features provide partial signal,
+they fail to capture:
+
+- contextual dynamics (e.g., trends, timing)
+- cultural factors (e.g., fandom, artist identity)
+- subjective experience (e.g., emotional resonance)
+
+This suggests a fundamental gap:
+
+> Current ML systems capture structure, but not meaning.
+
+Future work may require integrating richer signals,
+such as listener behavior, temporal context, and cultural information,
+to better align AI representations with human musical experience.
