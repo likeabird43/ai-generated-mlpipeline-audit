@@ -36,7 +36,7 @@ Your task:
 
 However, key issues were not fully addressed:
 
-* incomplete label matching (only ~20–30 hits aligned)
+* ChatGPT correctly flagged incomplete label matching (~22/50 hits aligned), but did not investigate the false match rate or its impact on label quality
 * potential duplicate leakage
 * lack of strict evaluation validation (e.g., group-aware splits)
 
