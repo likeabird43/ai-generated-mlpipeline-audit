@@ -41,9 +41,13 @@ def normalize_text(x):
 
 
 def split_artists(x):
-    x = normalize_text(x)
-    parts = re.split(r",|&|/|\+| x | and ", x)
-    return [p.strip() for p in parts if p.strip()]
+    if pd.isna(x):
+        return []
+    # Split first so separators are preserved, then normalize each token.
+    raw = str(x).lower().strip()
+    parts = re.split(r",|&|/|\+|\bx\b|\band\b", raw)
+    normalized_parts = [normalize_text(p) for p in parts]
+    return [p for p in normalized_parts if p]
 
 
 def load_data():
@@ -85,7 +89,7 @@ def prepare_spotify_label(spotify):
     df = spotify.copy()
 
     # Harmonize duration column
-    if "duration_ms" not in df.columns and "duration_ms" not in df.columns:
+    if "duration_ms" not in df.columns:
         raise ValueError("No duration_ms column found in spotify_tracks.csv")
 
     # Use top 10% popularity as proxy hit label
@@ -136,8 +140,8 @@ def evaluate_label(df, label_col, label_name):
 
     # CORRECT pipeline: SMOTE inside CV
     correct_pipe = Pipeline(steps=[
-        ("smote", SMOTE(random_state=42, k_neighbors=3)),
         ("scaler", StandardScaler()),
+        ("smote", SMOTE(random_state=42, k_neighbors=3)),
         ("model", RandomForestClassifier(n_estimators=200, random_state=42))
     ])
 
@@ -246,7 +250,10 @@ def main():
             print("Precision@50:", round(metrics["precision_at_50"], 4))
 
     metrics_df = pd.DataFrame(all_metrics)
-    importance_df = pd.concat(all_importances, ignore_index=True)
+    if all_importances:
+        importance_df = pd.concat(all_importances, ignore_index=True)
+    else:
+        importance_df = pd.DataFrame(columns=["label", "feature", "importance"])
 
     metrics_df.to_csv(OUT / "final_audit_metrics.csv", index=False)
     importance_df.to_csv(OUT / "final_feature_importance.csv", index=False)
