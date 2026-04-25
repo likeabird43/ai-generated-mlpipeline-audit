@@ -101,31 +101,6 @@ After auditing and re-implementing pipelines:
 
 > AI-generated results should be treated as **hypotheses**, not conclusions.
 
-## Cross-Model Consistency
-
-To test whether these issues were model-specific, I repeated the same experiment using multiple LLMs (e.g., ChatGPT and Claude) under identical prompts.
-
-Across models, the same pattern emerged:
-
-- Initially, both models reported very high performance (PR-AUC ~0.7+, ROC-AUC ~0.99)
-- Both provided confident explanations suggesting meaningful predictive signal
-- Under structured audit, both identified critical issues:
-  - SMOTE applied before cross-validation (data leakage)
-  - flawed evaluation procedures
-  - label noise due to imperfect matching
-
-After correction, performance dropped significantly:
-
-- PR-AUC ≈ 0.01–0.03 (from ~0.7+)
-- ROC-AUC ≈ ~0.7 (from ~0.99)
-
-This demonstrates that:
-
-> The failure is not specific to a single model,
-> but reflects a broader pattern in AI-generated ML workflows.
-
-Different models independently produced optimistic results under flawed evaluation setups,
-and revised them only after targeted technical auditing.
 
 
 ---
@@ -183,6 +158,33 @@ Key example:
 
 - Random splits hide real-world distribution shifts  
 - Metrics can appear strong while generalization is weak  
+
+---
+## Cross-Model Consistency
+
+To test whether these issues were model-specific, I repeated the same experiment using multiple LLMs (e.g., ChatGPT and Claude) under identical prompts.
+
+Across models, the same pattern emerged:
+
+- Initially, both models reported very high performance (PR-AUC ~0.7+, ROC-AUC ~0.99)
+- Both provided confident explanations suggesting meaningful predictive signal
+- Under structured audit, both identified critical issues:
+  - SMOTE applied before cross-validation (data leakage)
+  - flawed evaluation procedures
+  - label noise due to imperfect matching
+
+After correction, performance dropped significantly:
+
+- PR-AUC ≈ 0.01–0.03 (from ~0.7+)
+- ROC-AUC ≈ ~0.7 (from ~0.99)
+
+This demonstrates that:
+
+> The failure is not specific to a single model,
+> but reflects a broader pattern in AI-generated ML workflows.
+
+Different models independently produced optimistic results under flawed evaluation setups,
+and revised them only after targeted technical auditing.
 
 ---
 
