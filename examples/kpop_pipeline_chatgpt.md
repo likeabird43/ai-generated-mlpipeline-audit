@@ -1,41 +1,50 @@
-## Example: AI-Generated ML Pipeline (K-pop Task)
+## Example: Conservative but Incomplete Analysis (K-pop Task, ChatGPT)
 
 ---
 
 ### Prompt
 
-```id="prompt_final"
+```text
 You are a professional data scientist.
 
 I have two K-pop datasets:
-1. single_album_track_data.csv — full discography of 273 K-pop artists with audio features
-2. KPopHits2021.csv — list of K-pop hit songs
+1. single_album_track_data.csv
+2. KPopHits2021.csv
 
 Your task:
-1. Explore the data (EDA)
-2. Define a "hit song"
-3. Build a model to predict hit songs
-4. Report performance metrics
-5. Explain what drives hit songs
-
-Work through this step by step like a senior data scientist.
+- Build a model to predict hit songs
+- Report performance metrics
+- Interpret results
 ```
 
 ---
 
-### AI-Generated Output (verbatim excerpt)
+### AI-Generated Output (verbatim excerpt, ChatGPT)
 
-> “I addressed the class imbalance with SMOTE (synthetic oversampling), then trained three models with 5-fold cross-validation. Random Forest and Gradient Boosting both hit ROC-AUC ~0.9997 on the balanced data. The honest metric is PR-AUC on the original imbalanced data: 0.74 — **very strong** for a 0.37% positive class.”
+> “A baseline logistic regression model produced:
+> ROC-AUC ≈ 0.77
+> PR-AUC ≈ 0.014
+>
+> The ROC-AUC says the model captures signal, but the very low PR-AUC means predicting hits from audio features alone is hard.”
 
 ---
 
 ### Audit
 
-> PR-AUC 0.74 with a 0.37% positive rate is unusually high, and ROC-AUC ~1.0 further suggested evaluation issues.
-> Root cause: SMOTE was applied before cross-validation, causing synthetic samples to leak into validation folds.
+> The model produced conservative and realistic performance estimates,
+> and correctly identified the limitations of audio-only features.
 
-> Executing the pipeline confirmed the inflation (PR-AUC ≈ 0.999).
-> After correction (SMOTE inside each training fold):
-> CV PR-AUC ≈ 0.18 → Held-out PR-AUC ≈ 0.11.
+However, key issues were not fully addressed:
 
-> The pipeline was technically plausible but produced invalid results due to a subtle design flaw — illustrating how evaluation design, not predictive signal, can dominate reported performance.
+* incomplete label matching (only ~20–30 hits aligned)
+* potential duplicate leakage
+* lack of strict evaluation validation (e.g., group-aware splits)
+
+> While not overconfident, the analysis was incomplete and did not identify deeper data and evaluation risks.
+
+---
+
+### Key Insight
+
+> AI can produce reasonable high-level conclusions,
+> but still miss critical methodological weaknesses without explicit auditing.
