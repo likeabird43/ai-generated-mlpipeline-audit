@@ -48,3 +48,11 @@ However, key issues were not fully addressed:
 
 > AI can produce reasonable high-level conclusions,
 > but still miss critical methodological weaknesses without explicit auditing.
+
+
+--- 
+
+### Connection to Main Findings
+
+This example illustrates that even when AI identifies correct high-level limitations, 
+it may fail to fully investigate their implications without structured audit.
