@@ -264,7 +264,37 @@ this work offers a **framework for auditing AI-generated ML pipelines**.
 
 ## Data
 
-Datasets are publicly sourced and not included.
+Datasets are sourced from publicly available datasets and are not included in this repository.
+
+The project uses the following data:
+
+### K-pop datasets
+- `single_album_track_data.csv`  
+  → full K-pop discography (audio features)
+
+- `KPopHits2021.csv`  
+  → curated list of K-pop hit songs (2021)
+
+- `kpop_hits_all_years.csv`  
+  → extended multi-year K-pop hit list
+
+- `spotify_tracks.csv`  
+  → global Spotify dataset used for proxy label (popularity-based)
+
+---
+
+### Healthcare dataset
+- `heart_disease_uci.csv`  
+  → UCI Heart Disease dataset (multi-site cohorts: Cleveland, Hungary, Switzerland, VA Long Beach)
+
+---
+
+These datasets were used to test:
+
+- label instability (K-pop)
+- evaluation leakage (K-pop)
+- distribution shift (healthcare)
+  
 
 ---
 
