@@ -113,8 +113,28 @@ After auditing and re-implementing pipelines:
 
 > AI-generated results should be treated as **hypotheses**, not conclusions.
 
----
 
+---
+## Example AI-Generated Workflow
+
+Below is a simplified version of an AI-generated pipeline:
+
+> “Apply SMOTE to balance the dataset, then perform cross-validation and report PR-AUC.”
+
+This approach appears reasonable, but introduces a critical flaw:
+
+- SMOTE is applied before cross-validation
+- This leads to data leakage
+- Resulting in artificially inflated performance (PR-AUC ≈ 0.999)
+
+After auditing and correcting the pipeline:
+
+- PR-AUC drops to ≈ 0.18 (CV)
+- PR-AUC drops further to ≈ 0.11 (held-out)
+
+> This demonstrates how AI-generated workflows can produce plausible but invalid evaluation pipelines.
+
+---
 ## Case Study 1: K-pop Hit Prediction
 
 *(Label Instability + Evaluation Failure)*
@@ -179,6 +199,8 @@ Across both ChatGPT and Claude:
 | Switzerland   | 0.75    | 0.97   | 0.93          |
 | VA Long Beach | 0.72    | 0.85   | 0.75          |
 
+Note: The extremely high PR-AUC is largely driven by the very high positive rate (93%).
+
 ### Interpretation
 
 * Random splits produce inflated performance due to cohort mixing
@@ -240,6 +262,21 @@ The key insight:
 
 > Model performance is often determined by **how the problem is defined and evaluated**,
 > not by the underlying predictive signal.
+
+--- 
+## Contribution
+
+While the individual failure modes of ML pipelines are known,
+this project contributes a structured empirical audit of AI-generated workflows.
+
+Specifically, it shows that:
+
+- evaluation design, label construction, and data distribution independently distort model performance
+- these failure modes consistently appear across different models (ChatGPT and Claude)
+- AI-generated pipelines can produce plausible but invalid workflows without detecting their own errors
+
+Rather than proposing a new model,
+this work provides a reproducible framework for auditing the reliability of AI-generated ML pipelines.
 
 ---
 
