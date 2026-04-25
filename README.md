@@ -1,186 +1,177 @@
-> An AI-generated workflow, when implemented with a flawed but common evaluation setup,
-> produced PR-AUC of 0.999 on the same dataset where a corrected evaluation yielded 0.11.
-> This project shows how that happens — and why it matters.
-
-# When Evaluation Fails
-
-## Auditing an AI-Generated ML Pipeline on Noisy Data
+> **Research Question**
+> *When AI systems generate end-to-end data science workflows, under what conditions do they produce systematically misleading conclusions?*
 
 ---
 
-## Problem
+# Systematic Failure Modes in AI-Generated ML Pipelines
 
-This project does not aim to build a reliable K-pop hit prediction model.
+## Overview
 
-Instead, it audits an AI-assisted machine learning workflow on noisy real-world data, demonstrating how plausible modeling steps can lead to unstable or misleading conclusions.
+This project evaluates the reliability of **AI-generated data science workflows** in real-world, noisy environments.
+
+While large language models (LLMs) can generate plausible end-to-end pipelines, this work shows that under common conditions, they can produce **catastrophically misleading evaluation results**.
+
+By auditing workflows across two distinct domains — **K-pop hit prediction (high-noise)** and **healthcare prediction (high-stakes)** — this project identifies **systematic failure modes** where evaluation design dominates true predictive signal.
 
 ---
 
-## Workflow
+## Method
 
-This project follows a workflow generated from structured prompts to an AI system (e.g., ChatGPT):
+To empirically evaluate AI-generated workflows, I:
 
-1. **Dataset inspection**  
-   Identify data quality issues, leakage risks, and feasibility  
-
-2. **Label definition**  
-   Propose multiple definitions of "hit" and analyze label noise  
-
-3. **Baseline modeling**  
-   Build models and compare performance across labels  
-
-4. **Critical audit**  
-   Evaluate whether results are meaningful or misleading  
-
-While the AI correctly identified many data limitations, the workflow still proceeded toward modeling and evaluation — reflecting a common pattern where analysis continues despite weak problem formulation.
+1. Prompted an AI system (e.g., ChatGPT) to generate a complete ML pipeline
+2. Executed the pipeline **without modification**
+3. Identified flaws in evaluation design (e.g., leakage, invalid validation)
+4. Corrected the pipeline using proper methodology
+5. Compared performance between naive and corrected setups
+6. Repeated the audit across domains (K-pop and Healthcare)
 
 ---
 
 ## Key Finding
 
-A commonly used modeling setup (**SMOTE + cross-validation applied incorrectly**) produced near-perfect PR-AUC (~0.97–0.999).
+A commonly generated workflow (**SMOTE applied before cross-validation**) produced near-perfect performance:
 
-However, when corrected and evaluated on a proper hold-out set, performance dropped to realistic levels (~0.11–0.25).
+> **PR-AUC ≈ 0.97–0.999**
 
-This demonstrates that **evaluation design, rather than true predictive signal, can dominate model performance** in noisy real-world settings.
+However, when corrected and evaluated properly:
 
----
+> **PR-AUC ≈ 0.11–0.25**
 
-## Main Results (K-pop)
+This demonstrates that:
 
-| Label                 | Positive Rate | Wrong PR-AUC | Correct PR-AUC | Held-out PR-AUC |
-| --------------------- | ------------- | ------------ | -------------- | --------------- |
-| Strict (artist+title) | 2.1%          | 0.999        | 0.11           | 0.18            |
-| Loose (title only)    | 7.7%          | 0.987        | 0.18           | 0.20            |
-| Spotify proxy         | 10.0%         | 0.971        | 0.25           | 0.26            |
+> **Evaluation design — not true predictive signal — can dominate model performance.**
 
 ---
 
-## What Happened?
+## 1. Observed AI Failure Modes
 
-### 1. Evaluation Failure
+The audit reveals three systematic failure patterns:
 
-Improper evaluation (SMOTE applied before cross-validation) produced near-perfect results:
+### 1. Evaluation Leakage via Sequential Bias
 
-> PR-AUC ≈ 0.99
-
-But correct evaluation revealed the true performance:
-
-> PR-AUC ≈ 0.11–0.25
+AI frequently applies preprocessing (e.g., SMOTE) before cross-validation,
+introducing leakage and inflating metrics.
 
 ---
 
-### 2. Label Instability
+### 2. Optimization for Plausibility over Validity
 
-Different definitions of “hit” produced different results:
-
-- Strict label (clean but sparse)  
-- Loose label (noisy but larger)  
-- Spotify proxy (different concept entirely)  
-
-> The model is not learning “hit songs” — it is learning how the label is defined.
+Generated pipelines follow “standard best practices”
+without adapting to dataset-specific characteristics (e.g., label noise, imbalance).
 
 ---
 
-### 3. Fragile Conclusions
+### 3. Overconfidence under Distribution Shift
 
-Feature patterns appear meaningful:
-
-- louder songs  
-- less instrumental  
-- less acoustic  
-
-However, these patterns:
-
-- change across label definitions  
-- are sensitive to dataset assumptions  
-- do not translate into strong predictive performance  
+AI-generated models produce strong metrics under naive validation,
+but fail when evaluated under realistic conditions.
 
 ---
 
-## Cross-Domain Validation (Healthcare)
+## 2. Cross-Domain Evidence
 
-To test whether this failure mode is specific to noisy music data,  
-a similar audit was applied to a healthcare dataset for heart disease prediction.
+### Case A: K-pop (High Noise / Weak Labels)
 
-Under a standard random train/test split, the model appeared strong:
+An AI-generated pipeline achieved near-perfect performance due to evaluation leakage.
 
-- ROC-AUC: 0.92  
-- PR-AUC: 0.91  
-- Balanced accuracy: 0.85  
+| Setup                | PR-AUC    | Interpretation |
+| -------------------- | --------- | -------------- |
+| AI-generated (naive) | **0.999** | Misleading     |
+| Audited (corrected)  | **0.11**  | Realistic      |
 
-However, under a more realistic evaluation setting  
-(**site-held-out validation across hospitals**), performance dropped and became unstable:
-
-| Held-out cohort | ROC-AUC | PR-AUC | Balanced Accuracy |
-|---|---:|---:|---:|
-| Cleveland | 0.855 | 0.854 | 0.774 |
-| Hungary | 0.895 | 0.846 | 0.820 |
-| Switzerland | 0.747 | 0.973 | 0.740 |
-| VA Long Beach | 0.724 | 0.852 | 0.665 |
-
-This shows that even in a **more structured and clinically meaningful domain**,  
-performance can appear strong under naive evaluation,  
-but fail under realistic validation.
+👉 The model learned **evaluation artifacts**, not musical signal.
 
 ---
 
-## Dataset Construction Notes
+### Case B: Healthcare (Distribution Shift)
 
-The K-pop hit dataset is derived from Apple Music playlists, transferred to Spotify, and manually supplemented.
+Under standard validation:
 
-In some cases, instrumental or cover versions were used as substitutes, introducing additional noise and inconsistency.
+* ROC-AUC: **0.92**
+* PR-AUC: **0.91**
 
-As a result, the "hit" label should be interpreted as a proxy rather than a ground-truth measure of commercial success.
+Under realistic evaluation (site-held-out):
 
----
+* ROC-AUC: **0.72**
+* Performance becomes unstable
 
-## Final Insight
-
-Across both domains:
-
-- weakly defined problems (K-pop)  
-- and seemingly well-defined problems (healthcare)  
-
-AI-assisted workflows can produce results that appear meaningful,  
-but fail under careful audit.
-
-> The core issue is not the dataset alone,  
-> but the tendency of workflows to proceed toward modeling  
-> without sufficient validation of assumptions and evaluation design.
+👉 The model fails to generalize across hospitals.
 
 ---
 
-## Final Decision
+## 3. Why AI Systems Fail
 
-The appropriate conclusion is not to improve the model,  
-but to **stop and reframe the problem**.
+These failures are not accidental — they arise from structural limitations in AI-generated workflows:
+
+### 1. Context-Agnostic Pattern Matching
+
+AI prioritizes commonly seen patterns (e.g., SMOTE + CV)
+without reasoning about correct placement or assumptions.
+
+---
+
+### 2. Lack of Data Generating Process (DGP) Reasoning
+
+AI struggles to understand how data is created:
+
+* K-pop: playlist curation → label noise
+* Healthcare: hospital differences → distribution shift
+
+---
+
+### 3. Implicit Optimization for “Good Results”
+
+AI tends to produce pipelines that **look correct and yield high metrics**,
+even when those metrics are invalid.
+
+---
+
+## 4. Final Decision: Stop and Reframe
+
+The appropriate conclusion is **not to improve the model**, but to **reframe the problem**.
 
 This project shows that:
 
-- evaluation design can dominate performance  
-- labels and datasets can introduce hidden artifacts  
-- strong metrics do not imply reliable models  
+* High performance metrics can be **artifacts of evaluation design**
+* AI-generated workflows can produce **hallucinated performance**
+* Validation assumptions must be audited, not trusted
 
-Therefore:
+---
 
-> This work is best interpreted as an audit of AI-assisted ML workflows,  
-> rather than a predictive modeling solution.
+## Implications
+
+This has direct implications for real-world use:
+
+* **Business / industry:** flawed AI analysis can lead to incorrect strategic decisions
+* **Healthcare:** improper validation can create unsafe models
+* **AI deployment:** human oversight must focus on **assumptions**, not just code
+
+---
+
+## Conclusion
+
+Across both domains:
+
+* Weakly defined problems (K-pop)
+* and structured problems (healthcare)
+
+AI-generated workflows can produce convincing but unreliable results.
+
+> **The core risk is not model performance — but misplaced trust in evaluation.**
 
 ---
 
 ## Code
 
-- `final_music_audit.py` — K-pop audit  
-- `healthcare_audit.py` — healthcare audit  
+* `final_music_audit.py` — K-pop audit
+* `healthcare_audit.py` — cross-domain validation
 
 ---
 
-## Data Sources
+## Data
 
-Datasets are not included in this repository due to licensing and size constraints.
-
-Please download the original datasets from Kaggle and place them in the following structure:
+Datasets are sourced from public datasets (e.g., Kaggle) and are not included.
 
 ```text
 data/
@@ -189,6 +180,7 @@ data/
   kpop_hits_all_years.csv
   spotify_tracks.csv
   heart_disease_uci.csv
+```
 
 ---
 
@@ -198,4 +190,4 @@ data/
 pip install -r requirements.txt
 python final_music_audit.py
 python healthcare_audit.py
-
+```
