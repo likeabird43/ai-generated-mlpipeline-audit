@@ -10,15 +10,15 @@
 This project evaluates the reliability of **AI-generated data science workflows** under realistic data challenges.
 
 Large Language Models (LLMs) can generate technically plausible pipelines.
-However, their outputs can be **highly sensitive to evaluation design, label construction, and problem framing**, often leading to misleading conclusions if not carefully audited.
+However, their outputs can be **highly sensitive to evaluation design, label construction, problem framing, and prompt structure**, often leading to misleading conclusions if not carefully audited.
 
 Importantly, AI-generated workflows do not fail in a single consistent way.
-Instead, they exhibit **unstable and context-dependent behavior**, sometimes producing:
+Instead, they exhibit **unstable and context-dependent behavior**, including:
 
 * overconfident results
 * conservative but incomplete assessments
-* partially correct interpretations that miss critical flaws
-* correct reasoning in structured settings
+* partially correct reasoning that misses critical flaws
+* correct analysis under structured constraints
 
 To investigate this, I audited AI-generated workflows across two domains:
 
@@ -38,6 +38,11 @@ To evaluate AI-generated workflows, I followed a structured audit process:
 5. Reconstructed evaluation procedures to remove bias and leakage
 6. Re-implemented corrected pipelines in Python
 7. Compared naive vs corrected performance
+
+Additionally, I tested how **prompt structure** affects AI behavior:
+
+* **Open-ended prompts** → optimistic or flawed evaluation pipelines
+* **Structured audit prompts** → more conservative and methodologically sound analysis
 
 > The goal is not to optimize model performance, but to test whether AI-generated workflows produce **reliable conclusions under scrutiny**.
 
@@ -85,20 +90,16 @@ AI-generated workflows do not behave uniformly.
 Observed behaviors include:
 
 * **Overconfidence**
-
-  * near-perfect metrics under flawed evaluation
+  → near-perfect metrics under flawed evaluation
 
 * **Conservative behavior**
-
-  * low confidence when data is clearly noisy
+  → low confidence when data is clearly noisy
 
 * **Partial understanding**
+  → detects high-level issues but misses root causes
 
-  * detects generalization failure but misses root causes
-
-* **Correct reasoning (structured cases)**
-
-  * produces realistic and cautious analysis
+* **Correct reasoning (structured prompts)**
+  → produces realistic and cautious analysis
 
 > AI can adjust its confidence, but does not reliably detect when its own evaluation setup is invalid.
 
@@ -111,30 +112,32 @@ After auditing and re-implementing pipelines:
 * PR-AUC dropped from ~0.74 → ~0.01–0.03
 * ROC-AUC dropped from ~1.0 → ~0.70
 
-> AI-generated results should be treated as **hypotheses**, not conclusions.
-
+> AI-generated results should be treated as **hypotheses, not conclusions**.
 
 ---
+
+### 5. Prompt design significantly affects reliability
+
+Prompt structure directly influences the quality of AI-generated workflows.
+
+* Open-ended prompts → inflated metrics and missed evaluation flaws
+* Structured audit prompts → conservative and methodologically sound outputs
+
+> Reliable use of AI requires **explicitly structured prompts**, not just better models.
+
+---
+
 ## Example AI-Generated Workflow
 
-Below is a simplified version of an AI-generated pipeline:
+A concrete example is provided in:
 
-> “Apply SMOTE to balance the dataset, then perform cross-validation and report PR-AUC.”
+→ `examples/kpop_pipeline_chatgpt.md`
+→ `examples/kpop_pipeline_claude.md`
 
-This approach appears reasonable, but introduces a critical flaw:
-
-- SMOTE is applied before cross-validation
-- This leads to data leakage
-- Resulting in artificially inflated performance (PR-AUC ≈ 0.999)
-
-After auditing and correcting the pipeline:
-
-- PR-AUC drops to ≈ 0.18 (CV)
-- PR-AUC drops further to ≈ 0.11 (held-out)
-
-> This demonstrates how AI-generated workflows can produce plausible but invalid evaluation pipelines.
+These show how different models produce **different types of failure** under similar tasks.
 
 ---
+
 ## Case Study 1: K-pop Hit Prediction
 
 *(Label Instability + Evaluation Failure)*
@@ -155,29 +158,12 @@ The K-pop task is inherently noisy:
 
 ### Interpretation
 
-* **Evaluation failure reproduced**
-  → SMOTE before CV inflates performance
-
-* **Correction reveals reality**
-  → performance drops sharply
-
-* **Label sensitivity**
-  → different definitions produce different conclusions
+* Evaluation failure reproduced
+* Correction reveals true performance
+* Results highly sensitive to label definition
 
 > The model is not learning “hit songs,”
-> but is highly sensitive to how the target is constructed.
-
----
-
-### Robustness to Label Definition
-
-Across both ChatGPT and Claude:
-
-* PR-AUC remains low (~0.05–0.26)
-* Feature importance is unstable
-* Results depend strongly on label definition
-
-> There is no stable predictive signal — only label-dependent behavior.
+> but reacting to how the target is constructed.
 
 ---
 
@@ -185,7 +171,7 @@ Across both ChatGPT and Claude:
 
 *(Distribution Shift)*
 
-### Random Split (Naive)
+### Random Split
 
 * ROC-AUC: **0.92**
 * PR-AUC: **0.91**
@@ -199,15 +185,9 @@ Across both ChatGPT and Claude:
 | Switzerland   | 0.75    | 0.97   | 0.93          |
 | VA Long Beach | 0.72    | 0.85   | 0.75          |
 
-Note: The extremely high PR-AUC is largely driven by the very high positive rate (93%).
+Note: extremely high PR-AUC is driven by class imbalance.
 
-### Interpretation
-
-* Random splits produce inflated performance due to cohort mixing
-* Site-held-out results vary significantly across cohorts
-* Extremely high PR-AUC (e.g., Switzerland) is driven by class imbalance
-
-> Evaluation results depend strongly on data distribution.
+> Performance depends strongly on data distribution.
 
 ---
 
@@ -215,73 +195,63 @@ Note: The extremely high PR-AUC is largely driven by the very high positive rate
 
 Experiments were repeated using multiple LLMs (ChatGPT and Claude).
 
-While both models ultimately required external audit, their failure patterns differed:
+While both models required external audit, their **failure patterns differed**:
 
-- **ChatGPT** produced conservative estimates (PR-AUC ≈ 0.01–0.02) and correctly identified key limitations (e.g., incomplete label matching), but did not investigate their downstream impact.  
-  → Failure mode: *shallow but incomplete analysis*
+* **ChatGPT**
+  → conservative but incomplete
+  → identifies limitations (e.g., label mismatch)
+  → does not fully analyze their implications
 
-- **Claude** initially reported highly optimistic results (PR-AUC ≈ 0.74) and failed to detect evaluation flaws, but was able to identify and correct them when explicitly prompted.  
-  → Failure mode: *overconfident analysis with conditional self-correction*
+* **Claude**
+  → overconfident initial results
+  → fails to detect evaluation flaws
+  → corrects errors only after explicit prompting
 
-After audit and correction, both models converged to similarly low and unstable performance.
+After correction, both converge to similarly weak performance.
 
-> This suggests that AI failure modes are not uniform — models can fail in different ways depending on their reasoning path, initial assumptions, and interaction context.
-
-
+> AI systems do not fail uniformly —
+> failure depends on reasoning path, assumptions, and prompt structure.
 
 ---
 
 ## Observed Failure Modes
 
-### 1. Evaluation Leakage
-
-* SMOTE applied before cross-validation
-
-### 2. Label Instability
-
-* Different definitions → different models
-
-### 3. Proxy Target Bias
-
-* Popularity ≠ true outcome
-
-### 4. Distribution Shift
-
-* Random splits hide generalization failure
-
-### 5. Metric Misinterpretation
-
-* PR-AUC inflated by class imbalance
+1. Evaluation leakage
+2. Label instability
+3. Proxy target bias
+4. Distribution shift
+5. Metric misinterpretation
 
 ---
 
 ## Final Conclusion
 
-This project is not about building a successful prediction model.
+This project is not about building a better model.
 
-It is an audit of how AI-generated workflows behave under realistic conditions.
+It is an audit of how AI-generated workflows behave.
 
 > AI-generated ML workflows produce **unstable, context-dependent conclusions** that require external validation.
 
 The key insight:
 
-> Model performance is often determined by **how the problem is defined and evaluated**,
-> not by the underlying predictive signal.
+> Model performance is often determined by **problem definition and evaluation design**,
+> not by underlying predictive signal.
 
---- 
+---
+
 ## Contribution
 
-While the individual failure modes of ML pipelines are known,
-this project contributes a structured empirical audit of AI-generated workflows.
+This project provides a structured empirical audit of AI-generated workflows.
 
-Specifically, it shows that:
+It shows that:
 
-- evaluation design, label construction, and data distribution independently distort model performance
-- these failure modes consistently appear across different models (ChatGPT and Claude)
-- AI-generated pipelines can produce plausible but invalid workflows without detecting their own errors
+* evaluation design, label construction, and data distribution independently distort results
+* failure patterns vary across models
+* prompt design significantly influences reliability
+* AI-generated pipelines can appear valid while being fundamentally flawed
 
 Rather than proposing a new model,
-this work provides a reproducible framework for auditing the reliability of AI-generated ML pipelines.
+this work offers a **framework for auditing AI-generated ML pipelines**.
 
 ---
 
@@ -294,43 +264,23 @@ this work provides a reproducible framework for auditing the reliability of AI-g
 
 ## Data
 
-Datasets are sourced from public datasets and are not included.
-
-```
-data/
-  kpopfullspotifydiscography/
-    single_album_track_data.csv
-  kpop_hits_all_years.csv
-  kpophits2021.csv
-  spotify_tracks.csv
-  heart_disease_uci.csv
-```
-
+Datasets are publicly sourced and not included.
 
 ---
 
 ## Discussion: Can AI Learn Music Beyond Proxy Features?
 
-This project shows that audio features provide only weak and unstable signal for culturally defined outcomes such as “hit songs.”
+This project shows that audio features provide weak signals for culturally defined outcomes.
 
 This raises a broader question:
 
-> Can AI learn music in a way that aligns with human perception?
+> Can AI learn music in a way aligned with human perception?
 
-Current models rely on proxy features (e.g., loudness, energy, mode),
-which capture production characteristics rather than musical meaning.
+Current models capture structure (e.g., loudness, energy),
+but fail to capture:
 
-While such features provide partial signal,
-they fail to capture:
-
-- contextual dynamics (e.g., trends, timing)
-- cultural factors (e.g., fandom, artist identity)
-- subjective experience (e.g., emotional resonance)
-
-This suggests a fundamental gap:
+* cultural context
+* temporal dynamics
+* emotional meaning
 
 > Current ML systems capture structure, but not meaning.
-
-Future work may require integrating richer signals,
-such as listener behavior, temporal context, and cultural information,
-to better align AI representations with human musical experience.
