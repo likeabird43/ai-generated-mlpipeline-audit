@@ -52,7 +52,8 @@ Model performance is often determined more by **evaluation setup** than by actua
 Example (K-pop task):
 
 * Naive CV (incorrect SMOTE usage) → **PR-AUC ≈ 0.999**
-* Corrected CV → **PR-AUC ≈ 0.114**
+* Corrected CV → **PR-AUC ≈ 0.18**
+* Held-out test → **PR-AUC ≈ 0.11**
 
 > High performance can be entirely driven by evaluation artifacts.
 
@@ -66,7 +67,14 @@ Different definitions of “hit” produce dramatically different results:
 * loose title-only match
 * Spotify popularity proxy
 
-> The model is not learning a stable concept, but artifacts of label construction.
+| Label   | PR-AUC (Held-out) | Baseline |
+| ------- | ----------------- | -------- |
+| Strict  | 0.114             | 0.024    |
+| Loose   | 0.230             | 0.077    |
+| Spotify | 0.265             | 0.100    |
+
+> Performance improves as labels become looser,
+> but this reflects **label construction**, not stronger predictive signal.
 
 ---
 
@@ -100,14 +108,16 @@ Observed behaviors include:
 
 After auditing and re-implementing pipelines:
 
-* PR-AUC dropped from ~0.74 → ~0.01–0.02
-* ROC-AUC dropped from ~1.0 → ~0.76–0.81
+* PR-AUC dropped from ~0.74 → ~0.01–0.03
+* ROC-AUC dropped from ~1.0 → ~0.70
 
 > AI-generated results should be treated as **hypotheses**, not conclusions.
 
 ---
 
-## Case Study 1: K-pop Hit Prediction (Label Instability + Evaluation Failure)
+## Case Study 1: K-pop Hit Prediction
+
+*(Label Instability + Evaluation Failure)*
 
 The K-pop task is inherently noisy:
 
@@ -115,102 +125,82 @@ The K-pop task is inherently noisy:
 * label coverage is incomplete
 * matching between datasets is imperfect
 
-Three label definitions were evaluated:
+### Results
 
 | Label Definition |  Naive CV | Corrected CV | Held-out Test |
 | ---------------- | --------: | -----------: | ------------: |
-| Strict           | **0.999** |    **0.114** |         0.182 |
-| Loose            |     0.988 |        0.182 |         0.199 |
-| Spotify Proxy    |     0.971 |        0.251 |         0.259 |
+| Strict           | **0.999** |    **0.182** |     **0.114** |
+| Loose            |     0.988 |        0.220 |         0.230 |
+| Spotify Proxy    |     0.971 |        0.263 |         0.265 |
 
 ### Interpretation
 
-* **Evaluation failure reproduced:**
-  SMOTE applied before CV led to near-perfect performance
+* **Evaluation failure reproduced**
+  → SMOTE before CV inflates performance
 
-* **Correction reveals reality:**
-  Performance collapses after fixing evaluation
+* **Correction reveals reality**
+  → performance drops sharply
 
-* **Label instability:**
-  Different definitions lead to different conclusions
+* **Label sensitivity**
+  → different definitions produce different conclusions
 
-> The model is not learning “hit songs,” but **evaluation and labeling artifacts**.
+> The model is not learning “hit songs,”
+> but is highly sensitive to how the target is constructed.
 
 ---
 
 ### Robustness to Label Definition
 
-This analysis was extended using multiple label definitions,
-including a multi-year hit dataset and a Spotify-based proxy label.
-
 Across both ChatGPT and Claude:
 
-* PR-AUC remained consistently low (~0.05–0.19)
-* ROC-AUC remained in the weak-to-moderate range (~0.65–0.75)
-* Feature importance reflected genre-level artifacts rather than stable predictive signals
+* PR-AUC remains low (~0.05–0.26)
+* Feature importance is unstable
+* Results depend strongly on label definition
 
-Despite different modeling approaches and interpretations,
-both systems converged on the same conclusion:
-
-> Audio features alone provide only weak predictive signal for hit songs,
-> and model conclusions are highly sensitive to how "hit" is defined.
-
-This indicates that the problem is not only affected by evaluation artifacts,
-but is also fundamentally **weakly learnable** under realistic assumptions.
+> There is no stable predictive signal — only label-dependent behavior.
 
 ---
 
-## Case Study 2: Healthcare Prediction (Distribution Shift)
+## Case Study 2: Healthcare Prediction
 
-The healthcare dataset shows a different failure mode.
+*(Distribution Shift)*
 
 ### Random Split (Naive)
 
-* ROC-AUC: 0.920
-* PR-AUC: 0.906
+* ROC-AUC: **0.92**
+* PR-AUC: **0.91**
 
-### Site-held-out Validation (Realistic)
+### Site-held-out Validation
 
-Performance varies significantly across cohorts.
-
-Key example:
-
-> PR-AUC ≈ 0.97 with positive rate ≈ 93.5%
-> → metric inflation driven by class imbalance
+| Cohort        | ROC-AUC | PR-AUC | Positive Rate |
+| ------------- | ------- | ------ | ------------- |
+| Cleveland     | 0.85    | 0.85   | 0.46          |
+| Hungary       | 0.89    | 0.85   | 0.36          |
+| Switzerland   | 0.75    | 0.97   | 0.93          |
+| VA Long Beach | 0.72    | 0.85   | 0.75          |
 
 ### Interpretation
 
-* Random splits hide real-world distribution shifts
-* Metrics can appear strong while generalization is weak
+* Random splits produce inflated performance due to cohort mixing
+* Site-held-out results vary significantly across cohorts
+* Extremely high PR-AUC (e.g., Switzerland) is driven by class imbalance
+
+> Evaluation results depend strongly on data distribution.
 
 ---
 
 ## Cross-Model Consistency
 
-To test whether these issues were model-specific, I repeated the same experiment using multiple LLMs (e.g., ChatGPT and Claude) under identical prompts.
+Experiments were repeated using multiple LLMs (ChatGPT and Claude).
 
-Across models, the same pattern emerged:
+Across models:
 
-* Initially, both models reported very high performance (PR-AUC ~0.7+, ROC-AUC ~0.99)
-* Both provided confident explanations suggesting meaningful predictive signal
-* Under structured audit, both identified critical issues:
+* Both initially produced highly optimistic results
+* Both failed under flawed evaluation setups
+* Both converged to low, unstable performance after correction
 
-  * SMOTE applied before cross-validation (data leakage)
-  * flawed evaluation procedures
-  * label noise due to imperfect matching
-
-After correction, performance dropped significantly:
-
-* PR-AUC ≈ 0.01–0.03 (from ~0.7+)
-* ROC-AUC ≈ ~0.7 (from ~0.99)
-
-This demonstrates that:
-
-> The failure is not specific to a single model,
-> but reflects a broader pattern in AI-generated ML workflows.
-
-Different models independently produced optimistic results under flawed evaluation setups,
-and revised them only after targeted technical auditing.
+> The failure is not model-specific,
+> but reflects a broader limitation of AI-generated workflows.
 
 ---
 
@@ -219,33 +209,22 @@ and revised them only after targeted technical auditing.
 ### 1. Evaluation Leakage
 
 * SMOTE applied before cross-validation
-* leads to artificial performance inflation
 
 ### 2. Label Instability
 
-* different definitions produce different models
+* Different definitions → different models
 
 ### 3. Proxy Target Bias
 
-* popularity ≠ true success
+* Popularity ≠ true outcome
 
 ### 4. Distribution Shift
 
-* random splits overestimate generalization
+* Random splits hide generalization failure
 
 ### 5. Metric Misinterpretation
 
-* PR-AUC heavily depends on class balance
-
----
-
-## Why AI-Generated Workflows Fail
-
-These issues arise from structural limitations:
-
-1. Pattern-based reasoning without deep validation
-2. Lack of data-generating process awareness
-3. Sensitivity to prompt framing and evaluation setup
+* PR-AUC inflated by class imbalance
 
 ---
 
@@ -259,14 +238,15 @@ It is an audit of how AI-generated workflows behave under realistic conditions.
 
 The key insight:
 
-> High performance metrics should be treated as **hypotheses to audit**, not ground truth.
+> Model performance is often determined by **how the problem is defined and evaluated**,
+> not by the underlying predictive signal.
 
 ---
 
 ## Code
 
-* `final_music_audit.py` — evaluation and label audit for K-pop task
-* `healthcare_audit.py` — cohort-based validation
+* `final_music_audit.py`
+* `healthcare_audit.py`
 
 ---
 
