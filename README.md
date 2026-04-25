@@ -93,10 +93,30 @@ Under standard validation:
 
 Under realistic evaluation (site-held-out):
 
-* ROC-AUC: **0.72**
-* Performance becomes unstable
+* ROC-AUC: **0.72–0.89**
+* Performance varies significantly across cohorts
 
 👉 The model fails to generalize across hospitals.
+
+---
+
+### Important Observation: Distribution Shift (Not Dataset Size)
+
+The performance variation is primarily driven by **distribution shift across cohorts**,
+not by dataset size.
+
+For example:
+
+* Switzerland cohort has ~93% positive rate
+* Hungary cohort has ~36% positive rate
+
+This leads to misleading metrics such as:
+
+* High PR-AUC driven by class imbalance
+* Apparent performance that does not reflect real predictive ability
+
+👉 In particular, high PR-AUC in Switzerland is largely a **class imbalance artifact**,
+not evidence of strong model performance.
 
 ---
 
