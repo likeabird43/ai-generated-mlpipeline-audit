@@ -1,0 +1,6 @@
+evaluation,held_out_site,n,positive_rate,roc_auc,pr_auc,balanced_accuracy,note
+random_split,mixed,184,0.5543478260869565,0.9195361071257772,0.9063017703179738,0.848517455762793,Naive random split. May overestimate performance due to cohort mixing.
+site_heldout,Cleveland,304,0.45723684210526316,0.855243078264661,0.8544798871880104,0.7737083060824068,Site-held-out validation. More realistic test of cross-cohort generalization.
+site_heldout,Hungary,293,0.36177474402730375,0.8946624962163253,0.8460256266355358,0.8200988800322874,Site-held-out validation. More realistic test of cross-cohort generalization.
+site_heldout,Switzerland,123,0.9349593495934959,0.7467391304347826,0.9733082742105337,0.7402173913043478,Site-held-out validation. More realistic test of cross-cohort generalization.
+site_heldout,VA Long Beach,200,0.745,0.7239110409264377,0.8520833445439115,0.6645611264640084,Site-held-out validation. More realistic test of cross-cohort generalization.
