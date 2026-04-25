@@ -137,15 +137,16 @@ but the reasoning process and evaluation design behind it.
 See `final_music_audit.py` for full implementation.
 
 ---
+## Data Sources
+- single_album_track_data.csv: Kaggle — K-pop discography
+- kpop_hits_all_years.csv: Kaggle — K-pop hit list  
+- spotify_tracks.csv: Kaggle — Spotify tracks
 
+
+---
 ## Reproducibility
 
 ```bash
 pip install -r requirements.txt
 python final_music_audit.py
 
-
-## Data Sources
-- single_album_track_data.csv: Kaggle — K-pop discography
-- kpop_hits_all_years.csv: Kaggle — K-pop hit list  
-- spotify_tracks.csv: Kaggle — Spotify tracks
