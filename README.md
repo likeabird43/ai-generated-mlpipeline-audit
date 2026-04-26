@@ -273,9 +273,13 @@ However, they may still be useful for:
 
 # Code
 
-* `final_music_audit_1st.py`
-* `final_music_audit_2nd.py`
-* `healthcare_audit.py`
+* final_audit_metrics.csv
+* final_feature_importance.csv
+* second_experiment_feature_importance.csv
+* second_experiment_metrics.csv
+  
+* healthcare_audit_metrics.csv
+
 
 ---
 
