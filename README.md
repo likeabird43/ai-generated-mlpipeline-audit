@@ -193,6 +193,7 @@ We test how label definition changes model behavior.
 Note: extremely high PR-AUC is driven by class imbalance.
 
 > Performance depends strongly on data distribution.
+This demonstrates that even high-performing models can fail to generalize across different data distributions.
 
 ---
 
@@ -247,6 +248,8 @@ It is an audit of how models fail.
 > **evaluation design, label construction, and data structure**
 > rather than true predictive signal.
 
+Even when pipelines appear technically correct, hidden assumptions in data and evaluation can invalidate conclusions.
+
 ---
 
 ## Practical Implication
@@ -271,14 +274,12 @@ However, they may still be useful for:
 
 ---
 
+
 # Code
 
-* final_audit_metrics.csv
-* final_feature_importance.csv
-* second_experiment_feature_importance.csv
-* second_experiment_metrics.csv
-  
-* healthcare_audit_metrics.csv
+- final_music_audit_1st.py  
+- final_label_sensitivity_2nd.py  
+- healthcare_audit.py  
 
 
 ---
