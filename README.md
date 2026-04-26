@@ -174,7 +174,25 @@ We test how label definition changes model behavior.
 
 # Case Study 3: Healthcare — Distribution Shift
 
-(Random split vs site-held-out remains unchanged)
+*(Distribution Shift)*
+
+### Random Split
+
+* ROC-AUC: **0.92**
+* PR-AUC: **0.91**
+
+### Site-held-out Validation
+
+| Cohort        | ROC-AUC | PR-AUC | Positive Rate |
+| ------------- | ------- | ------ | ------------- |
+| Cleveland     | 0.85    | 0.85   | 0.46          |
+| Hungary       | 0.89    | 0.85   | 0.36          |
+| Switzerland   | 0.75    | 0.97   | 0.93          |
+| VA Long Beach | 0.72    | 0.85   | 0.75          |
+
+Note: extremely high PR-AUC is driven by class imbalance.
+
+> Performance depends strongly on data distribution.
 
 ---
 
