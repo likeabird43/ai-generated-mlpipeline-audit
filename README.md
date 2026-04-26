@@ -73,6 +73,7 @@ AI-generated workflows exhibit:
 * overconfidence
 * incomplete reasoning
 * strong dependence on prompt structure
+* conditional self-correction
 
 ---
 
@@ -178,8 +179,8 @@ We test how label definition changes model behavior.
 
 ### Random Split
 
-* ROC-AUC: **0.92**
-* PR-AUC: **0.91**
+- ROC-AUC: **0.92**
+- PR-AUC: **0.91**
 
 ### Site-held-out Validation
 
@@ -193,7 +194,20 @@ We test how label definition changes model behavior.
 Note: extremely high PR-AUC is driven by class imbalance.
 
 > Performance depends strongly on data distribution.
-This demonstrates that even high-performing models can fail to generalize across different data distributions.
+
+---
+
+### Audit Findings
+
+Audit revealed that the apparent performance was driven by:
+
+- site-level confounding
+- non-random missingness
+- coding artifacts (e.g., `chol = 0`)
+- post-diagnostic features
+- inconsistent target definitions
+
+> Even realistic analyses can rely on dataset artifacts.
 
 ---
 
@@ -250,6 +264,26 @@ It is an audit of how models fail.
 
 Even when pipelines appear technically correct, hidden assumptions in data and evaluation can invalidate conclusions.
 
+## Why do AI-generated pipelines fail?
+
+The failures observed in this project are not random bugs,
+but recurring patterns observed across multiple audit cases.
+
+- **Pattern-based reasoning over causal validation**  
+  AI systems apply commonly seen techniques (e.g., SMOTE)
+  without fully accounting for their impact on evaluation integrity.
+
+- **Optimization for plausibility**  
+  Outputs appear realistic and well-structured,
+  even when underlying assumptions are flawed.
+
+- **Passive error detection**  
+  Critical issues are not identified unless explicitly triggered
+  through structured audit prompts.
+
+> AI-generated pipelines are not inherently self-validating,
+> and require external validation to ensure reliability.
+
 ---
 
 ## Practical Implication
@@ -273,8 +307,17 @@ However, they may still be useful for:
 * Provides an audit framework for AI-generated pipelines
 
 ---
+# Detailed Audit Cases (Appendix)
+
+- examples/chatgpt_incomplete_reasoning.md  
+- examples/claude_self_audit_collapse.md  
+- examples/label_definition_sensitivity.md  
+- examples/healthcare_realistic_but_fragile.md  
+
+These provide concrete evidence of the failure modes discussed above.
 
 
+---
 # Code
 
 - final_music_audit_1st.py  
@@ -320,19 +363,16 @@ These datasets were used to test:
 
 ---
 
-## Discussion: Can AI Learn Music Beyond Proxy Features?
+## Discussion: Limits of Feature-Based Learning
 
 This project shows that audio features provide weak signals for culturally defined outcomes.
 
-This raises a broader question:
+This suggests a broader limitation:
 
-> Can AI learn music in a way aligned with human perception?
+- ML models capture measurable structure (e.g., loudness, energy)
+- but fail to capture higher-level concepts such as:
+  - cultural context
+  - temporal dynamics
+  - collective human perception
 
-Current models capture structure (e.g., loudness, energy),
-but fail to capture:
-
-* cultural context
-* temporal dynamics
-* emotional meaning
-
-> Current ML systems capture structure, but not meaning.
+> This gap helps explain why predicting “hit songs” is fundamentally difficult using audio features alone.
