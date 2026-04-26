@@ -1,4 +1,4 @@
-## Example: Conservative but Incomplete Analysis (K-pop Task, ChatGPT)
+## Audit Case: Incomplete Reasoning in AI-Generated Pipeline (ChatGPT)
 
 ---
 
@@ -22,37 +22,50 @@ Your task:
 ### AI-Generated Output (verbatim excerpt, ChatGPT)
 
 > “A baseline logistic regression model produced:
-> ROC-AUC ≈ 0.77
+> ROC-AUC ≈ 0.7–0.8
 > PR-AUC ≈ 0.014
 >
-> The ROC-AUC says the model captures signal, but the very low PR-AUC means predicting hits from audio features alone is hard.”
+> The ROC-AUC suggests some signal, but the very low PR-AUC indicates that predicting hits from audio features alone is difficult.”
 
 ---
 
 ### Audit
 
-> The model produced conservative and realistic performance estimates,
-> and correctly identified the limitations of audio-only features.
+At first glance, the analysis appears **reasonable and conservative**.
 
-However, key issues were not fully addressed:
+The model correctly identifies:
 
-* ChatGPT correctly flagged incomplete label matching (~22/50 hits aligned), but did not investigate the false match rate or its impact on label quality
-* potential duplicate leakage
-* lack of strict evaluation validation (e.g., group-aware splits)
+* weak predictive signal
+* difficulty of the task under extreme class imbalance
 
-> While not overconfident, the analysis was incomplete and did not identify deeper data and evaluation risks.
+However, a deeper audit reveals that the analysis is **incomplete**.
+
+Critical issues were not fully investigated:
+
+* incomplete label matching (~22/50 hits aligned), without assessing **false match rate or label noise**
+* potential **duplicate or near-duplicate leakage**
+* absence of strict evaluation validation (e.g., **group-aware splits by artist**)
+* no examination of how evaluation design may inflate or distort results
+
+> While the conclusions are directionally correct, the analysis stops at a surface-level interpretation and does not probe underlying methodological risks.
 
 ---
 
 ### Key Insight
 
-> AI can produce reasonable high-level conclusions,
-> but still miss critical methodological weaknesses without explicit auditing.
+> AI-generated analyses may appear correct at a high level,
+> but can still omit critical methodological weaknesses without structured audit.
 
-
---- 
+---
 
 ### Connection to Main Findings
 
-This example illustrates that even when AI identifies correct high-level limitations, 
-it may fail to fully investigate their implications without structured audit.
+This case illustrates a subtle but important failure mode:
+
+* not overconfidence
+* but **incomplete reasoning**
+
+Even when AI identifies valid limitations,
+it may fail to evaluate their **impact on data quality, evaluation validity, and generalization**.
+
+> Reliable conclusions require **explicit audit, not just plausible interpretation**.
