@@ -1,10 +1,10 @@
-## Example: AI Self-Audit and Collapse (K-pop Task, Claude)
+## Audit Case: Conditional Self-Correction in AI-Generated Pipeline (Claude)
 
 ---
 
 ### Prompt
 
-```id="claude_prompt"
+```text id="2z8t9n"
 You are a professional data scientist.
 
 I have two K-pop datasets:
@@ -34,48 +34,55 @@ The model was then asked to verify its own methodology and evaluation.
 
 ### Self-Audit Response (excerpt)
 
-> “SMOTE was applied before cross-validation — this is a data leakage error.” 
+> “SMOTE was applied before cross-validation — this is a data leakage error.”
 
-> “The original PR-AUC of 0.741 was computed with leakage and is not a valid estimate.” 
+> “The original PR-AUC of 0.741 was computed with leakage and is not a valid estimate.”
 
-> “Corrected PR-AUC is ~0.034, barely above random baseline (~0.004).” 
+> “Corrected PR-AUC is ~0.034, barely above random baseline (~0.004).”
 
-> “Estimated false match rate: ~38% of positive labels.” 
+> “Estimated false match rate: ~38% of positive labels.”
 
 ---
 
 ### Audit
 
-> The model initially produced highly optimistic results,
-> but failed to detect its own evaluation flaws.
+The initial output presents **extremely high performance**, suggesting near-perfect predictive power.
 
-> Only after explicit prompting did it identify:
+However, this result is driven by **critical evaluation flaws**, which the model fails to detect independently.
 
-* data leakage (pre-CV SMOTE)
-* label corruption (~38% false positives)
-* invalid evaluation metrics
+Only after explicit prompting does the model identify:
 
-> Performance collapsed after correction:
+* **data leakage** (SMOTE applied before cross-validation)
+* **label corruption** (~38% false positives due to matching errors)
+* **invalid evaluation metrics**
 
-* PR-AUC ≈ 0.74 → ≈ 0.034
+> Performance collapses after correction:
+
+```text id="y8r3sn"
+PR-AUC ≈ 0.74 → ≈ 0.01–0.03 (near-random range depending on evaluation setup)
+```
 
 ---
 
 ### Key Insight
 
-> AI systems can sometimes identify their own errors,
-> but only under explicit and structured audit.
+> AI systems may produce highly confident but invalid results,
+> and only identify their own errors under explicit and structured audit.
 
-This example illustrates a different failure mode:
+This illustrates a distinct failure mode:
 
-* not pure overconfidence
+* not just overconfidence
 * but **conditional self-correction**
 
 ---
 
 ### Connection to Main Findings
 
-> AI-generated workflows are not reliably self-validating.
+This case demonstrates that:
 
-Even when correct reasoning is possible,
-it requires external prompting and structured verification.
+* AI-generated workflows are **not reliably self-validating**
+* critical methodological errors can go undetected in initial outputs
+* even when correct reasoning is possible, it is **not triggered by default**
+
+> Reliable conclusions require **external validation and structured audit**,
+> not just internal consistency of the generated analysis.
