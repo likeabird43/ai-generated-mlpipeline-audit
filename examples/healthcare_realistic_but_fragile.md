@@ -15,7 +15,7 @@ Perform a realistic end-to-end data science workflow:
 - define the target
 - build a baseline model
 - evaluate conservatively
-- identify failure modes
+- identify failure modes```
 
 ---
 
