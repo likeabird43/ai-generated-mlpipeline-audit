@@ -1,10 +1,8 @@
 ## Audit Case: Realistic but Fragile Healthcare Modeling
 
 ---
-
 ### Prompt
 
-```text
 You are a professional data scientist.
 
 I have a healthcare dataset for predicting heart disease.
@@ -15,7 +13,8 @@ Perform a realistic end-to-end data science workflow:
 - define the target
 - build a baseline model
 - evaluate conservatively
-- identify failure modes```
+- identify failure modes
+
 
 ---
 
@@ -64,6 +63,9 @@ the initial answer was not wildly overconfident
 the model identified many real limitations
 but deeper audit still revealed serious deployment risks
 
+Both ChatGPT and Claude produced relatively conservative analyses,
+but neither fully accounted for site-level leakage and dataset artifacts without explicit audit.
+
 ---
 ### Connection to Main Findings
 
@@ -72,3 +74,9 @@ This healthcare case supports the broader conclusion:
 AI-generated ML workflows can appear careful and realistic, while still requiring external audit to detect hidden distribution shift, leakage, and target-definition problems.
 
 The model should be treated as an educational baseline, not a deployment-ready clinical system.
+
+---
+
+
+
+
